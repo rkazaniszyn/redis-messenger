@@ -315,8 +315,12 @@ class Connection
 
                 break;
             }
-
-            $decodedQueuedMessage = json_decode($queuedMessage, true);
+            try {
+                $decodedQueuedMessage = json_decode($queuedMessage, true, flags: JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                $queuedMessage = unserialize($queuedMessage);
+                $decodedQueuedMessage = json_decode($queuedMessage, true, flags: JSON_THROW_ON_ERROR);
+            }
             $this->add(\array_key_exists('body', $decodedQueuedMessage) ? $decodedQueuedMessage['body'] : $queuedMessage, $decodedQueuedMessage['headers'] ?? [], 0);
         }
 
